@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<style>
+  .loading-spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #000;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+  }
+</style>
+
+<body>
+  <div v-if='vertical' class="flex justify-evenly">
+    <div class="my-2 flex-grow" style="max-width: 30%;" v-for='key in keys'>
+      <div class="border-black border-b-2 p-2 ">{{key.label||key.name}}</div>
+      <div class="truncate border-gray-400 border p-2" v-for='(row, index) in data'>
+        <vslot :name='key.name' v='row,index'>
+          {{row[key.name] || '&nbsp;'}}
+        </vslot>
+      </div>
+    </div>
+  </div>
+  <form vdom='vform' v-else class="flex flex-col">
+    <div class="my-2" :style="'height:'+(key.height||key_size[1]);" v-for='key in keys'>
+      <div class="flex gap-2 h-full">
+        <div class="truncate" :style="'width:'+key_size[0]">{{key.label || key.name}}</div>
+        <div class="flex-grow" v-for='d in data'>
+          <v-input :required='key.required' v:value='d[key.name]' :typ='key.typ' :validate='key.validate'
+            :opts='key.opts'></v-input>
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-end mt-10">
+      <div v-if="loading" class="flex items-center justify-center w-32 py-2 bg-blue-300 rounded-md">
+        <div class="animate-spin loading-spinner"></div>
+      </div>
+      <button v-else @click.prevent='onOk'
+        class="bg-blue-300 transition-all hover:scale-105 active:bg-blue-400 w-32 py-2 rounded-md">ok</button>
+    </div>
+  </form>
+</body>
+<script setup>
+  loading = false
+  vertical = false
+  key_size = ['6rem', '2rem']
+  vform = null
+  mode = 0
+  keys = []
+  data = []
+  onOk = async () => {
+    let valid = $data.vform.checkValidity()
+    if (!valid) {
+      $data.vform.reportValidity()
+      return
+    }
+    loading = true
+    await $data.onsave($data.data)
+    loading = false
+  }
+  onsave = () => { }
+</script>
+<script></script>
+
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<style>
+  .clear {
+    background: none;
+    outline: none;
+  }
+
+  .clear:invalid+hr {
+    border: #f00 solid 1px !important;
+  }
+
+  &.vinput {
+    position: relative;
+    width: 100%;
+  }
+
+  hr {
+    margin: auto;
+    position: absolute;
+    bottom: -1px;
+    border: rgba(128, 128, 128, 0.2) solid 1px;
+    transition: all 0.2s linear;
+  }
+
+  &.vinput:hover hr {
+    border: rgba(128, 128, 128, 9) solid 1px;
+    width: 100% !important;
+    left: 0rem !important;
+  }
+
+
+  .vinput-core {
+    width: 100%;
+  }
+
+  input[type="text"]:focus {}
+</style>
+
+<body class='vinput'>
+  <div class="flex gap-4">
+    <div v-if='label' class="flex-shrink-0" :style="{width: label_width}">{{label}}</div>
+    <textarea vdom='vref' :rows='opts?.rows' v-if="typ==='textarea'" class="clear vinput-core grow" @input='sync' !value
+      :placeholder !required>
+    </textarea>
+    <div v-else-if='typ==="bool"'>
+      <div @click='value=!value'>{{value?'true':'false'}}</div>
+    </div>
+    <input vdom='vref' v-else-if='typ==="number"' class="clear vinput-core grow" type="number" @input='sync'
+      !value='value||0' :placeholder !required />
+    <input vdom='vref' v-else class="clear vinput-core grow" type="text" @input='sync' !value="value||''" :placeholder
+      !required />
+    <hr
+      :style="label?`width:calc(100% - 2rem - ${label_width});left: calc(1rem + ${label_width})`:'width:calc(100% - 2rem);left:1rem'">
+  </div>
+</body>
+<script setup>
+  vref = null
+  typ = 'text' // text textarea
+  required = false
+  value = ''
+  label = ''
+  label_width = '6rem'
+  placeholder = ''
+  opts = {
+    rows: 5
+  }
+  validate = (v) => true
+  sync = (event) => {
+    let v = event.target.value
+    if (!$data.check(v)) {
+      $data.vref.setCustomValidity("invalid");
+      return
+    }
+    $data.vref.setCustomValidity('');
+    if ($data.typ === 'textarea') {
+      $data.value = event.target.value
+    } else if ($data.typ === 'number') {
+      $data.value = Number(event.target.value)
+    } else {
+      // typ text
+      $data.value = event.target.value
+    }
+  }
+  check = (v) => {
+    if (!v) {
+      return !$data.required
+    }
+    if (!$data.validate) {
+      return true
+    } else if ($data.validate instanceof RegExp) {
+      if ($data.validate.test(v)) {
+        return true
+      }
+    } else if (typeof $data.validate === 'function') {
+      if ($data.validate(v)) {
+        return true
+      }
+    }
+    return false
+  }
+</script>
+
+</html>

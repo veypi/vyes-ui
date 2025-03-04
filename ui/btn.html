@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<style>
+  .loading-spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #000;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+  }
+</style>
+
+<body class="flex justify-center items-center w-32 py-2 rounded-md cursor-pointer hover:opacity-90">
+  <div @click='wrap'>
+    <vslot v-if='ok'></vslot>
+    <div v-else class="animate-spin loading-spinner"></div>
+  </div>
+</body>
+<script setup>
+  ok = true
+  click = async () => { }
+  wrap = async () => {
+    if (!ok) {
+      return
+    }
+    ok = false
+    await click()
+    ok = true
+  }
+</script>
+
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<body style="display:none;">
+  <vslot>
+    <div @click='show=false'>
+      blank dialog
+    </div>
+  </vslot>
+  {{show}}
+  {{a}}
+</body>
+<script setup>
+  show = true
+</script>
+<script>
+  let dom = document.createElement('div')
+  Object.assign(dom.style, {
+    position: 'fixed',
+    display: 'none',
+    left: '50%',
+    top: '50%',
+    transform: 'translate(-50%, -50%)',
+    'z-index': 1000,
+    transition: 'all 0.3s ease',
+  })
+  dom.classList.add('animate__animated')
+  document.body.appendChild(dom)
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      $data.show = false
+    }
+  })
+  document.addEventListener('click', (event) => {
+    if (dom.contains(event.target)) {
+      return
+    }
+    $data.show = false
+  })
+  let nodes = Array.from($node.childNodes)
+  dom.innerHTML = ''
+  dom.append(...nodes)
+  $vyes.vproxy.Watch(() => {
+    dom.classList.remove('animate__fadeIn')
+    dom.classList.remove('animate__fadeOut')
+    if ($data.show) {
+      dom.style.display = 'block'
+      dom.classList.add('animate__fadeIn')
+    } else {
+      dom.classList.add('animate__fadeOut')
+      setTimeout(() => {
+        dom.style.display = 'none'
+      }, 300)
+    }
+  })
+</script>
+
+</html>

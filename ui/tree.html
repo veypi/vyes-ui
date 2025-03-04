@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+  <div class="tree select-none">
+    <div class="node">
+      <div @click='onclick'>
+        <vslot name='name' v='row,depth'>
+          {{row.name}}
+        </vslot>
+      </div>
+      <div v-if='row.children' class="children transition-all overflow-hidden"
+        :style="{'max-height':row.expand?'100%':'0'}">
+        <vslot name='child' v='row,k,depth' v-for="row in row.children">
+          <div>
+            {{row.name}}
+          </div>
+        </vslot>
+      </div>
+    </div>
+  </div>
+</body>
+<script setup>
+  depth = 0
+  row = {
+    name: 'demo-dir',
+    expand: false,
+    children: [
+      {name: 'file1'}
+    ]
+  }
+  onexpand = () => { }
+  onclick = () => {
+    $data.row.expand = !$data.row.expand
+    if ($data.row.expand) {
+      $data.onexpand($data.row)
+    }
+  }
+</script>
+
+</html>
