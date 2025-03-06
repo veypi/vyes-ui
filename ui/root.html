@@ -1,14 +1,65 @@
-<!DOCTYPE html>
-<html>
-
+<!doctype html>
+<html lang="zh-CN">
 <head>
-  <meta charset="utf-8" />
-  <title>VYesUI</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VyesUI - 高效前端组件库</title>
+  <style>
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      justify-content: center;
+    }
+    .feature-card {
+      background-color: #f9fafb;
+      border-radius: 8px;
+      padding: 1.5rem;
+      width: 300px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+    }
+  </style>
 </head>
-
-<body>
-  <div>VYesUI</div>
-
-</body>
-
+<body class="h-full w-full bg-gray-100">
+  <div class="container">
+    <header class="header">
+      <h1 class="text-4xl font-bold">欢迎使用 VyesUI</h1>
+      <p class="mt-2 text-gray-700">一个基于 Vyes 框架构建的高效前端组件库</p>
+    </header>
+    <section class="features">
+      <div class="feature-card">
+        <h2 class="text-xl font-semibold">简洁易用</h2>
+        <p>遵循 HTML5 规范，提供直观的 API 设计，让开发者快速上手。</p>
+      </div>
+      <div class="feature-card">
+        <h2 class="text-xl font-semibold">响应式设计</h2>
+        <p>内置移动端优先的设计理念，确保在各种设备上都能获得良好的用户体验。</p>
+      </div>
+      <div class="feature-card">
+        <h2 class="text-xl font-semibold">灵活定制</h2>
+        <p>支持 Tailwind CSS 样式系统，方便开发者根据需求定制样式。</p>
+      </div>
+      <div class="feature-card">
+        <h2 class="text-xl font-semibold">丰富的组件</h2>
+        <p>包含多种常用组件，满足不同场景下的开发需求。</p>
+      </div>
+    </section>
+  </div>
+  <script setup>
+    // 可以在这里定义页面所需的响应式数据或方法
+    // 当前页面为静态展示，无需定义额外逻辑
+  </script>
 </html>

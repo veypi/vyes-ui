@@ -32,14 +32,37 @@
 
 
   .vinput-core {
-    width: 100%;
+    width: calc(100% - 1rem);
+    padding-left: 1rem;
   }
 
   input[type="text"]:focus {}
+
+  .option-list {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 4px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    z-index: 1;
+  }
+
+  .option-item {
+    padding: 8px;
+    cursor: pointer;
+  }
+
+  .option-item:hover {
+    background-color: #f0f0f0;
+  }
 </style>
 
-<body class='vinput'>
-  <div class="flex gap-4">
+<body class='vinput relative'>
+  <div class="flex relative">
     <div v-if='label' class="flex-shrink-0" :style="{width: label_width}">{{label}}</div>
     <textarea vdom='vref' :rows='opts?.rows' v-if="typ==='textarea'" class="clear vinput-core grow" @input='sync' !value
       :placeholder !required>
@@ -49,10 +72,20 @@
     </div>
     <input vdom='vref' v-else-if='typ==="number"' class="clear vinput-core grow" type="number" @input='sync'
       !value='value||0' :placeholder !required />
+    <input vdom='vref' v-else-if='typ==="select"' class="clear vinput-core grow" @input='sync' !value='selectLabel()'
+      :placeholder !required />
     <input vdom='vref' v-else class="clear vinput-core grow" type="text" @input='sync' !value="value||''" :placeholder
       !required />
     <hr
       :style="label?`width:calc(100% - 2rem - ${label_width});left: calc(1rem + ${label_width})`:'width:calc(100% - 2rem);left:1rem'">
+  </div>
+  <div class="option-list" v-if="typ=='select' && show_select">
+    <div v-if='filterOptions.length===0' class="option-item">
+      Not Found Options
+    </div>
+    <div @click='onselect(v)' class="option-item" v-for='v in filterOptions'>
+      {{v.label || v }}
+    </div>
   </div>
 </body>
 <script setup>
@@ -64,9 +97,34 @@
   label_width = '6rem'
   placeholder = ''
   opts = {
-    rows: 5
+    rows: 5,
   }
+
+  options = [
+    {value: '1', label: 'Label 1'},
+    {value: '2', label: 'Label 2'},
+    {value: '3', label: 'Label 3'},
+  ]
+  selectLabel = () => {
+    let res = value
+    options.forEach((o) => {
+      if (typeof o === 'string') {
+        return
+      }
+      if (o.value === value) {
+        res = o.label
+      }
+    })
+    return res
+  }
+  filterOptions = [...options]
+  show_select = false
   validate = (v) => true
+  onselect = (v) => {
+    value = v.value || v
+    // selectLabel = v.label
+    show_select = false
+  }
   sync = (event) => {
     let v = event.target.value
     if (!$data.check(v)) {
@@ -78,6 +136,17 @@
       $data.value = event.target.value
     } else if ($data.typ === 'number') {
       $data.value = Number(event.target.value)
+    } else if ($data.typ === 'bool') {
+      $data.value = event.target.value === 'true'
+    } else if ($data.typ === 'select') {
+      filterOptions = options.filter((o) => {
+        let tag = o.label || o.value || o
+        if (typeof tag !== 'string') {
+          tag = tag.toString()
+        }
+        return tag.includes(event.target.value)
+      })
+      show_select = true
     } else {
       // typ text
       $data.value = event.target.value

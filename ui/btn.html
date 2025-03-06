@@ -11,10 +11,8 @@
 </style>
 
 <body class="flex justify-center items-center w-32 py-2 rounded-md cursor-pointer hover:opacity-90">
-  <div @click='wrap'>
-    <vslot v-if='ok'></vslot>
-    <div v-else class="animate-spin loading-spinner"></div>
-  </div>
+  <vslot @click='wrap' class="w-full h-full" v-if='ok'>ok</vslot>
+  <div v-else class="animate-spin loading-spinner"></div>
 </body>
 <script setup>
   ok = true

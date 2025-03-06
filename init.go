@@ -1,7 +1,6 @@
 //
-// init.go
 // Copyright (C) 2025 veypi <i@veypi.com>
-// 2025-03-04 11:13
+// 2025-03-04 14:03:56
 // Distributed under terms of the MIT license.
 //
 
@@ -16,13 +15,12 @@ import (
 
 var Router = rest.NewRouter()
 
-//go:embed ui
+//go:embed ui/*
 var uifs embed.FS
 
 //go:embed ui/root.html
 var rootFile []byte
 
 var (
-	Static = Router.Get("/ui/*path", middlewares.EmbedDir(uifs, "ui", ""))
-	Root   = Router.Get("/*path", middlewares.EmbedFile(rootFile, "text/html"))
+	Static = Router.Get("/*path", middlewares.EmbedDir(uifs, "ui", "root.html"))
 )
