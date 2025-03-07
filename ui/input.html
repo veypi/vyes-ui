@@ -72,18 +72,21 @@
     </div>
     <input vdom='vref' v-else-if='typ==="number"' class="clear vinput-core grow" type="number" @input='sync'
       !value='value||0' :placeholder !required />
-    <input vdom='vref' v-else-if='typ==="select"' class="clear vinput-core grow" @input='sync' !value='selectLabel()'
-      :placeholder !required />
+    <div @click='sync' v-else-if='typ==="select"' class="vinput-core grow text-center cursor-pointer">
+      {{selectLabel()||'请选择'}}
+    </div>
     <input vdom='vref' v-else class="clear vinput-core grow" type="text" @input='sync' !value="value||''" :placeholder
       !required />
-    <hr
+    <hr v-if='typ!="select"'
       :style="label?`width:calc(100% - 2rem - ${label_width});left: calc(1rem + ${label_width})`:'width:calc(100% - 2rem);left:1rem'">
   </div>
   <div class="option-list" v-if="typ=='select' && show_select">
+    <input class="clear grow border-gray-400 border mx-auto my-2 p-1 block" style="width: 90%" @input='sync'
+      placeholder='筛选' />
     <div v-if='filterOptions.length===0' class="option-item">
       Not Found Options
     </div>
-    <div @click='onselect(v)' class="option-item" v-for='v in filterOptions'>
+    <div @click='onselect(v)' class="option-item border-b border-gray-100" v-for='v in filterOptions'>
       {{v.label || v }}
     </div>
   </div>
@@ -128,10 +131,10 @@
   sync = (event) => {
     let v = event.target.value
     if (!$data.check(v)) {
-      $data.vref.setCustomValidity("invalid");
+      $data.vref?.setCustomValidity("invalid");
       return
     }
-    $data.vref.setCustomValidity('');
+    $data.vref?.setCustomValidity('');
     if ($data.typ === 'textarea') {
       $data.value = event.target.value
     } else if ($data.typ === 'number') {
@@ -144,7 +147,7 @@
         if (typeof tag !== 'string') {
           tag = tag.toString()
         }
-        return tag.includes(event.target.value)
+        return tag.includes(event.target.value || '')
       })
       show_select = true
     } else {
