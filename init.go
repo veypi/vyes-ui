@@ -22,5 +22,7 @@ var uifs embed.FS
 var rootFile []byte
 
 var (
-	Static = Router.Get("/*path", middlewares.EmbedDir(uifs, "ui", "root.html"))
+	_ = Router.Get("/*path", middlewares.EmbedDir(uifs, "ui", "root.html")).UseBefore(func(x *rest.X) {
+		x.Header().Set("vyes-root", Router.String())
+	})
 )

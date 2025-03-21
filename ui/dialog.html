@@ -15,7 +15,6 @@
   let dom = document.createElement('div')
   Object.assign(dom.style, {
     position: 'fixed',
-    display: 'none',
     left: '50%',
     top: '50%',
     transform: 'translate(-50%, -50%)',
@@ -23,7 +22,6 @@
     transition: 'all 0.3s ease',
   })
   dom.classList.add('animate__animated')
-  document.body.appendChild(dom)
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
       $data.show = false
@@ -42,12 +40,13 @@
     dom.classList.remove('animate__fadeIn')
     dom.classList.remove('animate__fadeOut')
     if ($data.show) {
-      dom.style.display = 'block'
       dom.classList.add('animate__fadeIn')
+      document.body.appendChild(dom)
     } else {
       dom.classList.add('animate__fadeOut')
       setTimeout(() => {
-        dom.style.display = 'none'
+        // dom.style.display = 'none'
+        dom.remove()
       }, 300)
     }
   })

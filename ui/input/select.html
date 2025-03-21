@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<style>
+  .option-list {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 4px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    z-index: 1;
+  }
+
+  .option-item {
+    padding: 8px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .option-item:hover {
+    background-color: #f0f0f0;
+  }
+</style>
+
+<body style="position: relative;">
+  <div @click='onclick' class="select-none cursor-pointer">
+    {{selectLabel()||placeholder||'请选择'}}
+  </div>
+  <div class="option-list" v-if="show">
+    <input class="clear grow border-gray-400 border mx-auto my-2 p-1 block" style="width: 90%" @input='sync'
+      placeholder='筛选' />
+    <div v-if='filterOptions.length===0' class="option-item">
+      Not Found Options
+    </div>
+    <div @click='onselect(v)' class="option-item border-b border-gray-100" v-for='v in filterOptions'>
+      {{v.label || v }}
+    </div>
+  </div>
+</body>
+<script setup>
+  show = false
+  placeholder = ''
+  options = [
+    {value: '1', label: 'Label 1'},
+    {value: '2', label: 'Label 2'},
+    {value: '3', label: 'Label 3'},
+  ]
+  filterOptions = [...options]
+  value = ''
+  input = (v) => {
+    value = v
+  }
+  onclick = () => {
+    filterOptions = options.filter((o) => {
+      let tag = o.label || o.value || o
+      if (typeof tag !== 'string') {
+        tag = tag.toString()
+      }
+      return tag.includes(event.target.value || '')
+    })
+    show = true
+  }
+  onselect = (v) => {
+    input(v.value || v)
+    show = false
+  }
+  selectLabel = () => {
+    let res = value
+    options.forEach((o) => {
+      if (typeof o === 'string') {
+        return
+      }
+      if (o.value === value) {
+        res = o.label
+      }
+    })
+    return res
+  }
+</script>
+
+</html>
