@@ -5,24 +5,120 @@
     border: 4px solid rgba(0, 0, 0, 0.1);
     border-left-color: #000;
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
+    width: var(--size);
+    height: var(--size);
+  }
+
+  /* 基础样式 */
+  body {
+    --color: #3498db;
+    --size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color);
+    select: none;
+    line-height: 1;
+    user-select: none;
+    font-size: var(--size);
+    padding: calc(var(--size) / 2) var(--size);
+  }
+
+  body[size=lg] {
+    --size: 1.5rem;
+  }
+
+  body[size=md] {
+    --size: 1rem;
+  }
+
+  body[size=sm] {
+    --size: 0.75rem;
+  }
+
+  body[size=xs] {
+    --size: 0.5rem;
+  }
+
+  body:hover {
+    background-color: color-mix(in srgb, var(--color), white 20%);
+  }
+
+  /* 经典按钮 */
+  body[typ='classic'] {
+    color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  body[typ='classic']:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  /* 圆角按钮 */
+  body[typ=rounded] {
+    color: white;
+    border-radius: 25px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  body[typ=rounded]:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  /* 扁平按钮 */
+  body[typ=flat] {
+    color: white;
+    border-radius: 0;
+  }
+
+  body[typ=flat]:hover {
+    transform: translateY(-2px);
+  }
+
+  /* 边框按钮 */
+  body[typ=outline] {
+    background-color: transparent;
+    color: var(--color);
+    border: 2px solid var(--color);
+    border-radius: 4px;
+  }
+
+  body[typ=outline]:hover {
+    color: white;
   }
 </style>
 
-<body class="flex justify-center items-center w-32 py-2 rounded-md cursor-pointer hover:opacity-90">
+<body :typ='typ' :style='`--color:`+color' :size='size'>
   <vslot @click='wrap' class="w-full h-full" v-if='ok'>ok</vslot>
   <div v-else class="animate-spin loading-spinner"></div>
 </body>
 <script setup>
+  typ = 'classic'
+  color = ''
   ok = true
+  size = 'md'
   click = async () => { }
   wrap = async () => {
     if (!ok) {
       return
     }
     ok = false
-    await click()
+    let fc = click
+    if (fc instanceof Promise) {
+      fc = await fc
+    } else if (fc instanceof Function) {
+      fc = fc()
+    } else {
+      console.log('click is not a function', fc)
+    }
+    if (fc instanceof Promise) {
+      await fc
+    }
     ok = true
   }
 </script>

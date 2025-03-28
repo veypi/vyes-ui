@@ -11,7 +11,7 @@
     border: #f00 solid 1px !important;
   }
 
-  &.vinput {
+  body {
     position: relative;
     width: 100%;
   }
@@ -24,7 +24,7 @@
     transition: all 0.2s linear;
   }
 
-  &.vinput:hover hr {
+  body:hover hr {
     border: rgba(128, 128, 128, 9) solid 1px;
     width: 100% !important;
     left: 0rem !important;
@@ -61,7 +61,7 @@
   }
 </style>
 
-<body class='vinput relative'>
+<body class='relative'>
   <div class="flex relative">
     <div v-if='label' class="flex-shrink-0" :style="{width: label_width}">{{label}}</div>
     <textarea vdom='vref' :rows='opts?.rows' v-if="typ==='textarea'" class="clear vinput-core grow" @input='sync_evt'
@@ -72,7 +72,7 @@
     </div>
     <input vdom='vref' v-else-if='typ==="number"' class="clear vinput-core grow" type="number" @input='sync_evt'
       !value='value||0' :placeholder !required />
-    <input-select v:value v-else-if='typ==="select"' class="vinput-core grow" @input='sync' :options='opts.options'
+    <input-select v:value v-else-if='typ==="select"' class="vinput-core grow" :input='sync' :options='opts.options'
       :placeholder></input-select>
     <input vdom='vref' v-else class="clear vinput-core grow" type="text" @input='sync_evt' !value="value||''"
       :placeholder !required />
@@ -90,9 +90,9 @@
   placeholder = ''
   opts = {
     rows: 5,
+    options: []
   }
 
-  show_select = false
   validate = (v) => true
   sync_evt = (e) => {
     sync(e.target.value)

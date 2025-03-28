@@ -8,58 +8,171 @@
     width: 24px;
     height: 24px;
   }
+
+
+  .table {}
+
+  .table-column {
+    flex-grow: 1;
+    margin: 0.5rem 0;
+    max-width: 30%;
+    border-bottom: 2px solid black;
+  }
+
+  .header-key {
+    border-bottom: 2px solid black;
+    padding: 0 0.5rem;
+    font-size: 1.2rem;
+    height: 3rem;
+    line-height: 3rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    box-sizing: border-box;
+  }
+
+  .table-value {
+    display: block;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0.5rem;
+    height: 3rem;
+    line-height: 2rem;
+  }
+
+  .table-value[odd='1'] {
+    background-color: #f8f8f8;
+  }
+
+  .table-btn {}
+
+  .dialog {
+    height: 50vh;
+    width: 50vw;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 5rem;
+    border-radius: 0.5rem;
+  }
 </style>
 
 <body>
-  <div v-if='vertical' class="flex justify-evenly">
-    <div class="my-2 flex-grow" style="max-width: 30%;" v-for='key in keys'>
-      <div class="border-black border-b-2 p-2 ">{{key.label||key.name}}</div>
-      <div class="truncate border-gray-400 border p-2" v-for='(row, index) in data'>
-        <vslot :name='key.name' v='row,index'>
-          {{row[key.name] || '&nbsp;'}}
+  <div class="flex justify-evenly">
+    <div class="table-column" v-for='key in keys'>
+      <div class="header-key">{{key.label||key.name}}</div>
+      <div class="table-value" :odd='index%2' v-for='(row, index) in data'>
+        <vslot @click='onrowclick(row)' :name='key.name' v='row,index' :style="key.style">
+          <div refu='input' v:value='row[key.name]' :typ="key.typ" :required='key.required' :validate='key.validate'
+            :opts='key.opts' v-if='(editable || key.editable) && row._enable'>
+          </div>
+          <div v-else>
+            {{ (key.field?key.field(row):row[key.name]) || '&nbsp;'}}
+          </div>
         </vslot>
       </div>
     </div>
+    <div class="table-column">
+      <vslot name='_key' class="header-key">
+        <div refu='btn' @click='show(0)'>创建</div>
+        <div refu='btn' @click='show(1)'>配置</div>
+      </vslot>
+      <div class="table-value" :odd='index%2' v-for='(row, index) in data'>
+        <vslot class="" name='_value' v='row,index'>
+          <div refu='btn' size='sm' color='#78c' v-if='!row._enable' :click='()=>row._enable=true'>编辑</div>
+          <div refu='btn' size='sm' color='#afc' style="color: black;" v-else :click='()=>wrap(1, row)'>保存
+          </div>
+          <div refu='btn' size='sm' color='#f66' :click='()=>wrap(3, row)'>删除</div>
+        </vslot>
+        <vslot v='row' name='_addon'></vslot>
+      </div>
+    </div>
   </div>
-  <form vdom='vform' v-else class="flex flex-col">
-    <div class="my-2" :style="'height:'+(key.height||key_size[1]);" v-for='key in keys'>
-      <div class="flex gap-2 h-full">
-        <div class="truncate" :style="'width:'+key_size[0]">{{key.label || key.name}}</div>
-        <div class="flex-grow" v-for='d in data'>
-          <v-input :required='key.required' v:value='d[key.name]' :typ='key.typ' :validate='key.validate'
-            :opts='key.opts'></v-input>
-        </div>
+  <div class="flex justify-end items-center gap-2 px-4">
+    <i class="fa-solid fa-angles-left"></i>
+    <div>1</div>
+    <i class="fa-solid fa-angles-right"></i>
+  </div>
+  <div refu='dialog' v:show='showFlag'>
+    <div class="dialog">
+      <div v-if='showMode==0' refu='form' :keys="keys" :data='tmp' :onsave='async (d)=> await wrap(2,d)'>
       </div>
+      <table-setting :keys='keys' v-else-if='showMode==1'>
+      </table-setting>
     </div>
-    <div class="flex justify-end mt-10">
-      <div v-if="loading" class="flex items-center justify-center w-32 py-2 bg-blue-300 rounded-md">
-        <div class="animate-spin loading-spinner"></div>
-      </div>
-      <button v-else @click.prevent='onOk'
-        class="bg-blue-300 transition-all hover:scale-105 active:bg-blue-400 w-32 py-2 rounded-md">ok</button>
-    </div>
-  </form>
+  </div>
 </body>
 <script setup>
+  showFlag = false
+  showMode = 0
   loading = false
-  vertical = false
-  key_size = ['6rem', '2rem']
-  vform = null
-  mode = 0
   keys = []
   data = []
-  onOk = async () => {
-    let valid = $data.vform.checkValidity()
-    if (!valid) {
-      $data.vform.reportValidity()
+  host = window.location.origin
+  api = ''
+  editable = false
+
+  tmp = {}
+
+  show = (m) => {
+    showMode = m
+    showFlag = true
+  }
+
+  function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+  update = async (row) => {
+    if (api) {
+      return await $env.api.Patch(host + api + '/' + row.id, row)
+    }
+  }
+  next = async (page, size) => {
+    if (api) {
+      return await $env.api.Get(host + api + `?page=${page}&size=${step}`)
+    }
+    return []
+  }
+  create = async (data) => {
+    if (api) {
+      return await $env.api.Post(host + api, data)
+    }
+    return
+  }
+  del = async (row) => {
+    if (api) {
+      return await $env.api.Delete(host + api + '/' + row.id, row)
+    }
+  }
+  wrap = async (mode, data) => {
+    if (mode === 1) {
+      await update(data)
+      data._enable = false
+    } else if (mode === 2) {
+      let res = await create(data)
+      showFlag = false
+      $data.data.push(res)
+      return res
+    } else if (mode == 3) {
+      await del(data)
+      $data.data = $data.data.filter((d) => d.id !== data.id)
       return
     }
-    loading = true
-    await $data.onsave($data.data)
-    loading = false
   }
   onsave = () => { }
+  onerr = () => { }
+  onrowclick = () => { }
 </script>
-<script></script>
+<script>
+  if ($data.data.length === 0 && $data.api) {
+    try {
+      $data.data = await $data.next(0, 10)
+    } catch (e) {
+      $data.onerr(e)
+    }
+  }
+</script>
 
 </html>

@@ -31,7 +31,7 @@
     {{selectLabel()||placeholder||'请选择'}}
   </div>
   <div class="option-list" v-if="show">
-    <input class="clear grow border-gray-400 border mx-auto my-2 p-1 block" style="width: 90%" @input='sync'
+    <input class="clear grow border-gray-400 border mx-auto my-2 p-1 block" style="width: 90%" @input='filter'
       placeholder='筛选' />
     <div v-if='filterOptions.length===0' class="option-item">
       Not Found Options
@@ -49,12 +49,16 @@
     {value: '2', label: 'Label 2'},
     {value: '3', label: 'Label 3'},
   ]
-  filterOptions = [...options]
+  filterOptions = []
   value = ''
   input = (v) => {
     value = v
   }
   onclick = () => {
+    filterOptions = [...options]
+    show = true
+  }
+  filter = (event) => {
     filterOptions = options.filter((o) => {
       let tag = o.label || o.value || o
       if (typeof tag !== 'string') {
@@ -62,7 +66,6 @@
       }
       return tag.includes(event.target.value || '')
     })
-    show = true
   }
   onselect = (v) => {
     input(v.value || v)

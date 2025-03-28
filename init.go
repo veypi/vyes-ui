@@ -22,7 +22,10 @@ var uifs embed.FS
 var rootFile []byte
 
 var (
-	_ = Router.Get("/*path", middlewares.EmbedDir(uifs, "ui", "root.html")).UseBefore(func(x *rest.X) {
+	// _ = Router.Get("/*path", middlewares.EmbedDir(uifs, "ui", "root.html")).UseBefore(func(x *rest.X) {
+	// 	x.Header().Set("vyes-root", Router.String())
+	// })
+	_ = Router.Get("/*path", middlewares.Static("/home/v/workspace/vyes-ui/ui/", "root.html")).UseBefore(func(x *rest.X) {
 		x.Header().Set("vyes-root", Router.String())
 	})
 )

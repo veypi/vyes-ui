@@ -34,22 +34,25 @@
     $data.show = false
   })
   let nodes = Array.from($node.childNodes)
-  dom.innerHTML = ''
-  dom.append(...nodes)
-  $vyes.vproxy.Watch(() => {
-    dom.classList.remove('animate__fadeIn')
-    dom.classList.remove('animate__fadeOut')
-    if ($data.show) {
-      dom.classList.add('animate__fadeIn')
-      document.body.appendChild(dom)
-    } else {
-      dom.classList.add('animate__fadeOut')
-      setTimeout(() => {
-        // dom.style.display = 'none'
-        dom.remove()
-      }, 300)
-    }
-  })
+  setTimeout(() => {
+    dom.innerHTML = ''
+    dom.append(...nodes)
+    $vyes.vproxy.Watch(() => {
+      dom.classList.remove('animate__fadeIn')
+      dom.classList.remove('animate__fadeOut')
+      if ($data.show) {
+        dom.classList.add('animate__fadeIn')
+        document.body.appendChild(dom)
+      } else {
+        dom.classList.add('animate__fadeOut')
+        setTimeout(() => {
+          // dom.style.display = 'none'
+          // $node.appendChild(...nodes)
+          dom.remove()
+        }, 300)
+      }
+    })
+  }, 100)
 </script>
 
 </html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<style>
+</style>
+
+<body>
+  <form vdom='vform' class="flex flex-col gap-4">
+    <div class="my-2" v-if='!key.no_create' :style="'height:'+key.height" v-for='key in keys'>
+      <div class="flex gap-2 h-full">
+        <div class="truncate" :style="'width:'+label_width">{{key.label || key.name}}</div>
+        <div class="flex-grow">
+          {{key.no_create}}
+          <div refu='input' :required='key.required' v:value='data[key.name]' :typ='key.typ' :validate='key.validate'
+            :opts='key.opts'></div>
+        </div>
+      </div>
+    </div>
+    <div style="color: red;">{{errmsg}}</div>
+    <div class="flex justify-center mt-10">
+      <div size='lg' refu='btn' :click='onOk' style="width: 8rem;">Ok</div>
+    </div>
+  </form>
+</body>
+<script setup>
+  label_width = '6rem'
+  keys = []
+  data = {}
+  vform = null
+  errmsg = ''
+  onsave = async () => { }
+  onOk = async () => {
+    let valid = $data.vform.checkValidity()
+    if (!valid) {
+      $data.vform.reportValidity()
+      return
+    }
+    try {
+      await $data.onsave($data.data)
+    } catch (error) {
+      errmsg = error.message || error || '未知错误'
+      console.error(error)
+    }
+  }
+</script>
+
+</html>
