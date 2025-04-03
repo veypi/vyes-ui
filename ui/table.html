@@ -50,21 +50,25 @@
   .table-btn {}
 
   .dialog {
-    height: 50vh;
+    min-height: 50vh;
     width: 50vw;
     background-color: #fff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     padding: 5rem;
     border-radius: 0.5rem;
   }
+
+  body {
+    overflow-x: auto;
+  }
 </style>
 
 <body>
   <div class="flex justify-evenly">
-    <div class="table-column" v-for='key in keys'>
+    <div class="table-column" style="min-height: 20rem;" v-for='key in keys'>
       <div class="header-key">{{key.label||key.name}}</div>
       <div class="table-value" :odd='index%2' v-for='(row, index) in data'>
-        <vslot @click='onrowclick(row)' :name='key.name' v='row,index' :style="key.style">
+        <vslot :name='key.name' v='row,index' :style="key.style">
           <div refu='input' v:value='row[key.name]' :typ="key.typ" :required='key.required' :validate='key.validate'
             :opts='key.opts' v-if='(editable || key.editable) && row._enable'>
           </div>
@@ -78,6 +82,7 @@
       <vslot name='_key' class="header-key">
         <div refu='btn' @click='show(0)'>创建</div>
         <div refu='btn' @click='show(1)'>配置</div>
+        <div refu='btn' @click='show(2)'>智能导入</div>
       </vslot>
       <div class="table-value" :odd='index%2' v-for='(row, index) in data'>
         <vslot class="" name='_value' v='row,index'>
@@ -101,6 +106,11 @@
       </div>
       <table-setting :keys='keys' v-else-if='showMode==1'>
       </table-setting>
+      <div v-else-if class="w-full flex flex-col items-center gap-4">
+        <textarea class="w-full bg-gray-200 flex-grow p-4" !value='ai_content' @input='ai_content=$event.target.value'
+          rows=10 style="resize:vertical;"></textarea>
+        <div refu='btn' class="mx-auto" size='lg' @click='ai()'>识别</div>
+      </div>
     </div>
   </div>
 </body>
@@ -113,6 +123,56 @@
   host = window.location.origin
   api = ''
   editable = false
+  ai_content = ''
+  ai = async () => {
+    console.log(ai_content, 2)
+    let keyData = keys.map((k) => {
+      return {key: k.name, label: k.label}
+    })
+    let body = JSON.stringify({
+      system: "",
+      model: 'qwen-max-latest',
+      messages: [{
+        role: 'user', content: `
+接下来我将给你一个结构体描述信息和一段文本，请直接以json方式返回提取的结构信息,如果提取失败就返回空列表对象[]
+结构体：
+  ${JSON.stringify(keyData)}
+描述信息：
+  ${ai_content}
+`}]
+    })
+    ai_content = ''
+    let json_res = ''
+    let checked = false
+    await $env.api.SSE(`${window.location.origin}/_/api/ai/gen`, {method: "POST", body: body}, (line, idx) => {
+      if (idx === -1) {
+        try {
+          let data = JSON.parse(ai_content.slice(7, -3))
+          let fc = async () => {
+            let c = 0
+            for (d of data) {
+              c++
+              create(d)
+            }
+            alert(`成功导入${c}条数据`)
+          }
+        } catch (e) {
+          console.log(e)
+        }
+        console.log('done')
+      }
+      if (line.indexOf('```json')) {
+        json_res += line.slice(line.indexOf('```json'))
+        checked = true
+      } else if (checked && line.indexOf('```')) {
+        json_res += line.slice(0, line.indexOf('```'))
+        checked = false
+      } else if (checked) {
+        json_res += line
+      }
+      ai_content += line
+    })
+  }
 
   tmp = {}
 
@@ -163,7 +223,6 @@
   }
   onsave = () => { }
   onerr = () => { }
-  onrowclick = () => { }
 </script>
 <script>
   if ($data.data.length === 0 && $data.api) {

@@ -8,9 +8,8 @@ package vyesui
 
 import (
 	"embed"
-
 	"github.com/veypi/OneBD/rest"
-	"github.com/veypi/OneBD/rest/middlewares"
+	"github.com/veypi/OneBD/rest/middlewares/vyes"
 )
 
 var Router = rest.NewRouter()
@@ -21,11 +20,6 @@ var uifs embed.FS
 //go:embed ui/root.html
 var rootFile []byte
 
-var (
-	// _ = Router.Get("/*path", middlewares.EmbedDir(uifs, "ui", "root.html")).UseBefore(func(x *rest.X) {
-	// 	x.Header().Set("vyes-root", Router.String())
-	// })
-	_ = Router.Get("/*path", middlewares.Static("/home/v/workspace/vyes-ui/ui/", "root.html")).UseBefore(func(x *rest.X) {
-		x.Header().Set("vyes-root", Router.String())
-	})
-)
+func init() {
+	vyes.WrapUI(Router, uifs)
+}

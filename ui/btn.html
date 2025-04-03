@@ -91,9 +91,15 @@
   body[typ=outline]:hover {
     color: white;
   }
+
+  body.disable {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+  }
 </style>
 
-<body :typ='typ' :style='`--color:`+color' :size='size'>
+<body :typ='typ' :class="{disable}" :style='`--color:`+color' :size='size'>
   <vslot @click='wrap' class="w-full h-full" v-if='ok'>ok</vslot>
   <div v-else class="animate-spin loading-spinner"></div>
 </body>
@@ -102,9 +108,10 @@
   color = ''
   ok = true
   size = 'md'
+  disable = false
   click = async () => { }
   wrap = async () => {
-    if (!ok) {
+    if (!ok || disable) {
       return
     }
     ok = false
