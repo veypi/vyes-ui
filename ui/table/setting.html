@@ -19,32 +19,27 @@
   }
 </style>
 
-<body class="container flex flex-col h-full overflow-auto gap-8">
+<body class="container flex flex-col h-full gap-8">
   <!-- 字段选择 -->
-  <h2>表格展示配置</h2>
+  <h2 class="text-2xl">高级检索设置</h2>
   <!-- 行数设置 -->
   <div class="config-item">
-    <label for="rowLimit">行数限制：</label>
-    <input type="number" id="rowLimit" !value="rowLimit" min="1" max="100" />
+    <label>行数限制：</label>
+    <input type="number" !value="opts.page_size" @input='opts.page_size=Number($event.target.value)' min="1"
+      max="100" />
   </div>
   <!-- 排序设置 -->
-  <div class="config-item">
+  <div class="config-item flex">
     <label>排序字段：</label>
-    <select !value="sortField">
-      <option value="">无</option>
-      <option v-for="field in selectedFieldsConfig()" :value="field.key">{{ field.label }}</option>
-    </select>
+    <input-select class="flex-grow" v:value='opts.sort_by' :options='options()'></input-select>
     <label style="margin-left:1rem">排序方向：</label>
-    <select !value="sortDirection">
-      <option value="asc">升序</option>
-      <option value="desc">降序</option>
-    </select>
+    <input-select class="flex-grow" v:value='opts.order' :options='directionOpts'></input-select>
   </div>
   <div class="config-item">
     <h4>选择显示字段：</h4>
     <div class="field-list mt-4">
-      <span v-for="field in keys" :class="['field-item', field.show===false?'':'bg-blue-100' ]"
-        @click="field.show=!field.show">
+      <span v-for="field in keys" :class="['field-item', field.hidden?'':'bg-blue-100' ]"
+        @click="field.hidden=!field.hidden">
         {{ field.label || field.name }}
       </span>
     </div>
@@ -52,8 +47,10 @@
   <!-- 筛选设置 -->
   <div class="config-item">
     <h4 class="mb-4">字段筛选：</h4>
-    <div v-for="field in selectedFieldsConfig()" class="mb-2">
-      <div refu='input' :label='field.label' v:value='filters[field.name]' :typ='field.type'></div>
+    <div class="flex flex-wrap justify-between">
+      <div v-for="field in selectedFieldsConfig()" class="mb-2">
+        <div refu='input' label_width='8rem' :label='field.label' v:value='filters[field.name]' type='text'></div>
+      </div>
     </div>
   </div>
   <div class="flex-grow"></div>
@@ -62,21 +59,33 @@
 <script setup>
   // 默认配置
   keys = [
-    {key: 'id', label: 'ID', type: 'number'},
-    {key: 'name', label: '姓名', type: 'string'},
-    {key: 'age', label: '年龄', type: 'number'},
-    {key: 'email', label: '邮箱', type: 'string'},
-    {key: 'department', label: '部门', type: 'string'}
+    {name: 'id', label: 'ID', type: 'number'},
+    {name: 'name', label: '姓名', type: 'string'},
   ]
+  opts = {
+    page: 1,
+    page_size: 10,
+    keyword: '',
+    keywords: {},
+    sort_by: 'created_at',
+    order: 'desc',
+  }
 
   selectedFields = ['id', 'name'] // 已选中字段
   rowLimit = 20 // 行数限制
   sortField = '' // 排序字段
   sortDirection = 'asc' // 排序方向
   filters = {} // 筛选条件
+  options = () => keys.map(f => {
+    return {value: f.name, label: f.label}
+  })
+  directionOpts = [
+    {value: 'asc', label: '升序'},
+    {value: 'desc', label: '降序'}
+  ]
 
   // 计算属性
-  selectedFieldsConfig = () => keys.filter(f => f.show !== false)
+  selectedFieldsConfig = () => keys.filter(f => !f.hidden)
 
   // 方法
   toggleField = (key) => {
@@ -101,6 +110,8 @@
       filters: filters
     })
   }
+</script>
+<script>
 </script>
 
 </html>

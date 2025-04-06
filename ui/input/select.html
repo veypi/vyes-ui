@@ -2,19 +2,6 @@
 <html>
 
 <style>
-  .option-list {
-    position: absolute;
-    right: 0;
-    top: 100%;
-    margin-top: 4px;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    z-index: 1;
-  }
-
   .option-item {
     padding: 8px;
     cursor: pointer;
@@ -24,13 +11,59 @@
   .option-item:hover {
     background-color: #f0f0f0;
   }
+
+  ::-webkit-scrollbar,
+  ::-webkit-scrollbar-track {
+    width: 0.25rem;
+    height: 0.25rem;
+    background: none;
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    transform: translateX(10px);
+  }
+
+  body {
+    position: relative;
+    display: inline-flex;
+    user-select: none;
+    cursor: pointer;
+    justify-content: center;
+  }
+
+  .option-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    z-index: 1;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s;
+    max-height: 40vh;
+    overflow-y: auto;
+  }
+
+  body:hover .option-list {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
 </style>
 
-<body style="position: relative;">
+<body>
   <div @click='onclick' class="select-none cursor-pointer">
     {{selectLabel()||placeholder||'请选择'}}
   </div>
-  <div class="option-list" v-if="show">
+  <div @click='onclick'>🔻</div>
+  <div class="option-list">
     <input class="clear grow border-gray-400 border mx-auto my-2 p-1 block" style="width: 90%" @input='filter'
       placeholder='筛选' />
     <div v-if='filterOptions.length===0' class="option-item">
@@ -42,7 +75,6 @@
   </div>
 </body>
 <script setup>
-  show = false
   placeholder = ''
   options = [
     {value: '1', label: 'Label 1'},
@@ -53,10 +85,6 @@
   value = ''
   input = (v) => {
     value = v
-  }
-  onclick = () => {
-    filterOptions = [...options]
-    show = true
   }
   filter = (event) => {
     filterOptions = options.filter((o) => {
@@ -83,6 +111,9 @@
     })
     return res
   }
+</script>
+<script>
+  filterOptions = [...options]
 </script>
 
 </html>

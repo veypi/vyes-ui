@@ -46,6 +46,7 @@
 
   body:hover {
     background-color: color-mix(in srgb, var(--color), white 20%);
+    color: black;
   }
 
   /* 经典按钮 */
@@ -89,7 +90,9 @@
   }
 
   body[typ=outline]:hover {
-    color: white;
+    background-color: transparent;
+    color: color-mix(in srgb, var(--color), white 40%);
+    border: 2px solid color-mix(in srgb, var(--color), white 40%);
   }
 
   body.disable {

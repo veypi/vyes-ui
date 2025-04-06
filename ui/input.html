@@ -34,55 +34,34 @@
   .vinput-core {
     width: calc(100% - 1rem);
     padding-left: 1rem;
+    min-width: 3rem;
   }
 
   input[type="text"]:focus {}
-
-  .option-list {
-    position: absolute;
-    right: 0;
-    top: 100%;
-    margin-top: 4px;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    z-index: 1;
-  }
-
-  .option-item {
-    padding: 8px;
-    cursor: pointer;
-  }
-
-  .option-item:hover {
-    background-color: #f0f0f0;
-  }
 </style>
 
 <body class='relative'>
   <div class="flex relative">
     <div v-if='label' class="flex-shrink-0" :style="{width: label_width}">{{label}}</div>
-    <textarea vdom='vref' :rows='opts?.rows' v-if="typ==='textarea'" class="clear vinput-core grow" @input='sync_evt'
+    <textarea vdom='vref' :rows='opts?.rows' v-if="type==='textarea'" class="clear vinput-core grow" @input='sync_evt'
       !value :placeholder !required>
     </textarea>
-    <div v-else-if='typ==="bool"'>
+    <div v-else-if='type==="bool"'>
       <div @click='value=!value'>{{value?'true':'false'}}</div>
     </div>
-    <input vdom='vref' v-else-if='typ==="number"' class="clear vinput-core grow" type="number" @input='sync_evt'
+    <input vdom='vref' v-else-if='type==="number"' class="clear vinput-core grow" type="number" @input='sync_evt'
       !value='value||0' :placeholder !required />
-    <input-select v:value v-else-if='typ==="select"' class="vinput-core grow" :input='sync' :options='opts.options'
+    <input-select v:value v-else-if='type==="select"' class="vinput-core grow" :input='sync' :options='opts.options'
       :placeholder></input-select>
     <input vdom='vref' v-else class="clear vinput-core grow" type="text" @input='sync_evt' !value="value||''"
       :placeholder !required />
-    <hr v-if='typ!="select"'
+    <hr v-if='type!="select"'
       :style="label?`width:calc(100% - 2rem - ${label_width});left: calc(1rem + ${label_width})`:'width:calc(100% - 2rem);left:1rem'">
   </div>
 </body>
 <script setup>
   vref = null
-  typ = 'text' // text textarea
+  type = 'text' // text textarea
   required = false
   value = ''
   label = ''
@@ -103,16 +82,16 @@
       return
     }
     $data.vref?.setCustomValidity('');
-    if ($data.typ === 'textarea') {
+    if ($data.type === 'textarea') {
       $data.value = v
-    } else if ($data.typ === 'number') {
+    } else if ($data.type === 'number') {
       $data.value = Number(v)
-    } else if ($data.typ === 'bool') {
+    } else if ($data.type === 'bool') {
       $data.value = v === 'true'
-    } else if ($data.typ === 'select') {
+    } else if ($data.type === 'select') {
       $data.value = v
     } else {
-      // typ text
+      // type text
       $data.value = v
     }
   }
@@ -132,6 +111,23 @@
       }
     }
     return false
+  }
+</script>
+<script>
+  if (!$data.value) {
+    switch ($data.type) {
+      case 'number':
+        sync(0)
+        break
+      case 'bool':
+        sync(false)
+        break
+      case 'select':
+        sync('')
+        break
+      default:
+        sync('')
+    }
   }
 </script>
 

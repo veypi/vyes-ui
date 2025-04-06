@@ -6,12 +6,11 @@
 
 <body>
   <form vdom='vform' class="flex flex-col gap-4">
-    <div class="my-2" v-if='!key.no_create' :style="'height:'+key.height" v-for='key in keys'>
+    <div class="my-2" v-if='!key.disabled' :style="'height:'+key.height" v-for='key in keys'>
       <div class="flex gap-2 h-full">
         <div class="truncate" :style="'width:'+label_width">{{key.label || key.name}}</div>
         <div class="flex-grow">
-          {{key.no_create}}
-          <div refu='input' :required='key.required' v:value='data[key.name]' :typ='key.typ' :validate='key.validate'
+          <div refu='input' :required='key.required' v:value='data[key.name]' :type='key.type' :validate='key.validate'
             :opts='key.opts'></div>
         </div>
       </div>

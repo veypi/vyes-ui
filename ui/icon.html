@@ -1,8 +1,31 @@
-<body style="display: inline-block;">
-  <i class="iconfont cursor-pointer opacity-80 hover:opacity-100" :class="'icon-'+name"
-    :style="`font-size:${size}`"></i>
+<style>
+  body {
+    --icon-size: var(--icon-size, 2rem);
+    --icon-color: var(--icon-color, #000);
+    height: var(--icon-size);
+    width: var(--icon-size);
+    font-size: calc(var(--icon-size), 0.5rem);
+    line-height: var(--icon-size);
+    border-radius: 50%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s;
+    cursor: pointer;
+    color: var(--icon-color);
+  }
+
+  body:hover {
+    background-color: color-mix(in srgb, var(--icon-color), white 40%);
+    color: #fff;
+  }
+</style>
+
+<body :style="`--icon-size:${size};--icon-color:${color}`">
+  <i class="iconfont" :class="'icon-'+name"></i>
 </body>
 <script setup>
-  size = 'inherit'
+  size = '2rem'
+  color = '#000'
   name = ''
 </script>
