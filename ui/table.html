@@ -48,7 +48,7 @@
   }
 
   .table-value[odd='1'] {
-    background-color: color-mix(in srgb, var(--background-color), #888 20%);
+    /* background-color: color-mix(in srgb, var(--background-color, #fff), #888 20%); */
   }
 
   .table-btn {}
@@ -80,6 +80,11 @@
     border-radius: 5px;
     transform: translateX(10px);
   }
+
+  .keysearch {
+    outline: none;
+    border: 1px solid var(--color, #000);
+  }
 </style>
 
 <body>
@@ -105,7 +110,7 @@
           <div refu='icon' class="text-2xl" name='ecs'></div>
           <div vslot='menu'>
             <div class="dropdown-item" @click='show(0)'>创建</div>
-            <div class="dropdown-item" @click='show(1)'>检索</div>
+            <div class="dropdown-item" @click='show(1)'>高级检索</div>
             <div class="dropdown-item" @click='show(2)'>智能导入</div>
           </div>
         </div>
@@ -120,22 +125,23 @@
       </div>
     </div>
   </div>
-  <div class="flex items-center gap-2 px-4">
-    <i class="fa-solid fa-angles-left ml-auto"></i>
-    <div>1</div>
-    <i class="fa-solid fa-angles-right mr-auto"></i>
-    <div class="">总计{{total}}</div>
+  <div class="flex items-center gap-2 px-4 select-none">
+    <input !value='listOpts.keyword' @input.delay1s='search' class="keysearch" placeholder="简单检索" />
+    <div refu='icon' name='left' class="ml-auto" @click='wrap(0,-1)'></div>
+    <div>{{listOpts.page}}</div>
+    <div refu='icon' name='right' class="mr-auto" @click='wrap(0,1)'></div>
+    <div class="">总计{{total}}条数据</div>
   </div>
   <div refu='dialog' v:show='showFlag'>
     <div class="dialog">
       <div v-if='showMode==0' refu='form' :keys="keys" :data='{}' :onsave='async (d)=> await wrap(2,d)'>
       </div>
-      <table-setting :keys='keys' :opts='listOpts' v-else-if='showMode==1'>
+      <table-setting :keys='keys' :opts='listOpts' v-else-if='showMode==1' :apply='()=>wrap(0)'>
       </table-setting>
       <div v-else-if class="w-full flex flex-col flex-grow items-center gap-4" style=" height: calc(100% - 0px);">
         <textarea class="w-full bg-gray-200 flex-grow p-4" placeholder="请输入文本内容或者拖入文件" !value='ai_content'
           @input='ai_content=$event.target.value' style="resize:vertical;"></textarea>
-        <div refu='btn' class="mx-auto" size='lg' @click='ai()'>智能识别</div>
+        <div refu='btn' class="mx-auto" size='lg' :click='ai'>智能识别</div>
       </div>
     </div>
   </div>
@@ -151,16 +157,19 @@
   editable = false
   ai_content = ''
   ai = async () => {
-    console.log(ai_content, 2)
-    let keyData = keys.map((k) => {
-      return {key: k.name, label: k.label}
+    let keyData = []
+    keys.forEach((k) => {
+      if (k.disabled) {
+        return
+      }
+      keyData.push({key: k.name, label: k.label, type: k.type || 'text'})
     })
     let body = JSON.stringify({
       system: "",
       model: 'qwen-max-latest',
       messages: [{
         role: 'user', content: `
-接下来我将给你一个结构体描述信息和一段文本，请直接以json方式返回提取的结构信息,如果提取失败就返回空列表对象[]
+接下来我将给你一个结构体描述信息和一段文本，结构体参数默认为字符串类型,如果参数 请直接以json方式返回提取的结构信息,如果提取失败就返回空列表对象[],如果用户提出生成随机数据或者生成数据等请求，请你根据字段描述生成mock数据
 结构体：
   ${JSON.stringify(keyData)}
 描述信息：
@@ -173,24 +182,32 @@
     await $env.api.SSE(`${window.location.origin}/_/api/ai/gen`, {method: "POST", body: body}, (line, idx) => {
       if (idx === -1) {
         try {
+          console.log(json_res)
           let data = JSON.parse(ai_content.slice(7, -3))
+          console.log(data)
           let fc = async () => {
             let c = 0
             for (d of data) {
-              c++
-              create(d)
+              try {
+                create(d)
+                c++
+              } catch (e) {
+                console.log(e)
+              }
             }
             alert(`成功导入${c}条数据`)
+            next()
           }
+          fc()
         } catch (e) {
           console.log(e)
         }
         console.log('done')
       }
-      if (line.indexOf('```json')) {
-        json_res += line.slice(line.indexOf('```json'))
+      if (line.indexOf('```json') != -1) {
+        json_res = line.slice(line.indexOf('```json'))
         checked = true
-      } else if (checked && line.indexOf('```')) {
+      } else if (checked && line.indexOf('```') != -1) {
         json_res += line.slice(0, line.indexOf('```'))
         checked = false
       } else if (checked) {
@@ -212,6 +229,12 @@
     }
   }
   total = 0
+  max = () => {
+    if (total > 0) {
+      return Math.ceil(total / listOpts.page_size)
+    }
+    return 0
+  }
   listOpts = {
     page: 1,
     page_size: 10,
@@ -220,10 +243,10 @@
     sort_by: 'created_at',
     order: 'desc',
   }
-  next = async (page, size) => {
+  next = async (opts) => {
     if (api) {
-      let opts = Object.assign({}, listOpts)
-      if (Object.keys(opts.keywords).length > 0) {
+      opts = Object.assign({}, opts)
+      if (opts.keywords && Object.keys(opts.keywords).length > 0) {
         opts.keywords = JSON.stringify(opts.keywords)
       } else {
         delete opts.keywords
@@ -243,17 +266,37 @@
       return await $env.api.Delete(host + api + '/' + row.id, row)
     }
   }
-  wrap = async (mode, data) => {
-    if (mode === 1) {
-      await update(data)
-      data._enable = false
+  search = (e) => {
+    listOpts.keyword = e.target.value
+    wrap(0)
+  }
+  wrap = async (mode, props) => {
+    showFlag = false
+    if (mode === 0) {
+      if (typeof props === 'number') {
+        listOpts.page += props
+      }
+      if (listOpts.page < 1) {
+        listOpts.page = 1
+        return
+      }
+      let data = await $data.next(listOpts)
+      if (Array.isArray(data)) {
+        $data.data = data
+      } else {
+        $data.data = data.items
+        $data.total = data.total
+      }
+    } else if (mode === 1) {
+      await update(props)
+      props._enable = false
     } else if (mode === 2) {
-      let res = await create(data)
+      let res = await create(props)
       showFlag = false
       $data.data.push(res)
       return res
     } else if (mode == 3) {
-      await del(data)
+      await del(props)
       $data.data = $data.data.filter((d) => d.id !== data.id)
       return
     }
@@ -264,14 +307,7 @@
 <script>
   if ($data.data.length === 0 && $data.api) {
     try {
-      // $data.data = await $data.next(0, 10)
-      let data = await $data.next(0, 10)
-      if (Array.isArray(data)) {
-        $data.data = data
-      } else {
-        $data.data = data.items
-        $data.total = data.total
-      }
+      wrap(0)
     } catch (e) {
       $data.onerr(e)
     }

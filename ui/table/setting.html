@@ -48,16 +48,15 @@
   <div class="config-item">
     <h4 class="mb-4">字段筛选：</h4>
     <div class="flex flex-wrap justify-between">
-      <div v-for="field in selectedFieldsConfig()" class="mb-2">
+      <div v-for="field in keys" class="mb-2">
         <div refu='input' label_width='8rem' :label='field.label' v:value='filters[field.name]' type='text'></div>
       </div>
     </div>
   </div>
   <div class="flex-grow"></div>
-  <button class="float-right bg-blue-400 rounded px-4 py-2" @click="applyConfig">应用配置</button>
+  <button class="float-right bg-blue-400 rounded px-4 py-2" @click="wrap_apply">应用配置</button>
 </body>
 <script setup>
-  // 默认配置
   keys = [
     {name: 'id', label: 'ID', type: 'number'},
     {name: 'name', label: '姓名', type: 'string'},
@@ -70,12 +69,7 @@
     sort_by: 'created_at',
     order: 'desc',
   }
-
-  selectedFields = ['id', 'name'] // 已选中字段
-  rowLimit = 20 // 行数限制
-  sortField = '' // 排序字段
-  sortDirection = 'asc' // 排序方向
-  filters = {} // 筛选条件
+  filters = {}
   options = () => keys.map(f => {
     return {value: f.name, label: f.label}
   })
@@ -83,35 +77,20 @@
     {value: 'asc', label: '升序'},
     {value: 'desc', label: '降序'}
   ]
-
-  // 计算属性
-  selectedFieldsConfig = () => keys.filter(f => !f.hidden)
-
-  // 方法
-  toggleField = (key) => {
-    if (selectedFields.includes(key)) {
-      selectedFields = selectedFields.filter(f => f !== key)
-    } else {
-      selectedFields.push(key)
+  apply = () => {
+    console.log('当前配置:', opts)
+  }
+  wrap_apply = () => {
+    let tmp = {}
+    for (let key in filters) {
+      if (filters[key] !== undefined && filters[key] !== '' && filters[key] !== null) {
+        tmp[key] = filters[key]
+      }
     }
+    opts.keywords = tmp
+    console.log('当前配置:', opts)
+    apply()
   }
-  updateFilter = (fieldKey, value) => {
-    if (value) {
-      filters[fieldKey] = value
-    } else {
-      delete filters[fieldKey]
-    }
-  }
-  applyConfig = () => {
-    console.log('当前配置:', {
-      fields: selectedFields,
-      limit: rowLimit,
-      sort: {field: sortField, direction: sortDirection},
-      filters: filters
-    })
-  }
-</script>
-<script>
 </script>
 
 </html>

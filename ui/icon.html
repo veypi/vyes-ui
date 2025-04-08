@@ -4,9 +4,8 @@
     --icon-color: var(--icon-color, #000);
     height: var(--icon-size);
     width: var(--icon-size);
-    font-size: calc(var(--icon-size), 0.5rem);
+    font-size: calc(var(--icon-size) - 0.5rem);
     line-height: var(--icon-size);
-    border-radius: 50%;
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -15,17 +14,42 @@
     color: var(--icon-color);
   }
 
+  body i {
+    font-family: "iconfont" !important;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+  }
+
   body:hover {
-    background-color: color-mix(in srgb, var(--icon-color), white 40%);
+    opacity: 0.8;
+  }
+
+  body[type=round] {
+    border-radius: 50%;
+  }
+
+  body[type=round]:hover {
+    background-color: color-mix(in srgb, var(--icon-color), #999 40%);
     color: #fff;
+  }
+
+  body[type=rect]:hover {
+    background-color: color-mix(in srgb, var(--icon-color), #999 40%);
+    color: #fff;
+  }
+
+  body[type=outline] {
+    border: 1px solid var(--icon-color);
+    background-color: transparent;
   }
 </style>
 
-<body :style="`--icon-size:${size};--icon-color:${color}`">
-  <i class="iconfont" :class="'icon-'+name"></i>
+<body :style="`--icon-size:${size};--icon-color:${color}`" :type>
+  <i :class="'icon-'+name"></i>
 </body>
 <script setup>
   size = '2rem'
   color = '#000'
   name = ''
+  type = 'round' // rect, round, outline, none
 </script>
