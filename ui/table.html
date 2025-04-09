@@ -9,8 +9,11 @@
     height: 24px;
   }
 
-
-  .table {}
+  body {
+  }
+  .table {
+    min-height: 20rem;
+  }
 
   .table-column {
     flex-grow: 1;
@@ -88,7 +91,7 @@
 </style>
 
 <body>
-  <div class="flex justify-evenly overflow-x-auto">
+  <div class="flex table justify-evenly overflow-x-auto">
     <div v-if='!key.hidden' class="table-column" :class="{'sticky-column':index===0}" style="min-height: 21rem;left:0"
       v-for='(key,index) in keys'>
       <div class="header-key">{{key.label||key.name}}</div>
@@ -134,8 +137,9 @@
   </div>
   <div refu='dialog' v:show='showFlag'>
     <div class="dialog">
-      <div v-if='showMode==0' refu='form' :keys="keys" :data='{}' :onsave='async (d)=> await wrap(2,d)'>
-      </div>
+      <vslot v-if='showMode==0' name='create' v='keys,oncreate'>
+        <table-create :keys='keys' :oncreate='oncreate'></table-create>
+      </vslot>
       <table-setting :keys='keys' :opts='listOpts' v-else-if='showMode==1' :apply='()=>wrap(0)'>
       </table-setting>
       <div v-else-if class="w-full flex flex-col flex-grow items-center gap-4" style=" height: calc(100% - 0px);">
@@ -196,7 +200,7 @@
               }
             }
             alert(`成功导入${c}条数据`)
-            next()
+            wrap(0)
           }
           fc()
         } catch (e) {
@@ -229,12 +233,6 @@
     }
   }
   total = 0
-  max = () => {
-    if (total > 0) {
-      return Math.ceil(total / listOpts.page_size)
-    }
-    return 0
-  }
   listOpts = {
     page: 1,
     page_size: 10,
@@ -270,47 +268,54 @@
     listOpts.keyword = e.target.value
     wrap(0)
   }
-  wrap = async (mode, props) => {
-    showFlag = false
-    if (mode === 0) {
-      if (typeof props === 'number') {
-        listOpts.page += props
-      }
-      if (listOpts.page < 1) {
-        listOpts.page = 1
-        return
-      }
-      let data = await $data.next(listOpts)
-      if (Array.isArray(data)) {
-        $data.data = data
-      } else {
-        $data.data = data.items
-        $data.total = data.total
-      }
-    } else if (mode === 1) {
-      await update(props)
-      props._enable = false
-    } else if (mode === 2) {
-      let res = await create(props)
-      showFlag = false
-      $data.data.push(res)
-      return res
-    } else if (mode == 3) {
-      await del(props)
-      $data.data = $data.data.filter((d) => d.id !== data.id)
-      return
-    }
+  oncreate = async (d) => {
+    await wrap(2, d)
   }
-  onsave = () => { }
-  onerr = () => { }
-</script>
-<script>
-  if ($data.data.length === 0 && $data.api) {
+  wrap = async (mode, props) => {
     try {
-      wrap(0)
+      if (mode === 0) {
+        if (typeof props === 'number') {
+          listOpts.page += props
+        }
+        let max = Math.ceil(total / listOpts.page_size)
+        if (listOpts.page < 1) {
+          listOpts.page = 1
+          return
+        } else if (listOpts.page > max && max > 0) {
+          listOpts.page = max
+          return
+        }
+        let data = await $data.next(listOpts)
+        if (Array.isArray(data)) {
+          $data.data = data
+        } else {
+          $data.data = data.items
+          $data.total = data.total
+        }
+      } else if (mode === 1) {
+        await update(props)
+        props._enable = false
+      } else if (mode === 2) {
+        let res = await create(props)
+        showFlag = false
+        $data.data.push(res)
+      } else if (mode == 3) {
+        await del(props)
+        $data.data = $data.data.filter((d) => d.id !== data.id)
+      }
+      showFlag = false
     } catch (e) {
       $data.onerr(e)
     }
+    console.log('done')
+  }
+  onerr = (e) => {
+    console.error(e)
+  }
+</script>
+<script>
+  if ($data.data.length === 0 && $data.api) {
+    wrap(0)
   }
 </script>
 

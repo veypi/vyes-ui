@@ -17,7 +17,7 @@
     </div>
     <div style="color: red;">{{errmsg}}</div>
     <div class="flex justify-center mt-10">
-      <div size='lg' refu='btn' :click='onOk' style="width: 8rem;">Ok</div>
+      <div size='lg' refu='btn' :click='onOk' style="width: 8rem;">创建</div>
     </div>
   </form>
 </body>
@@ -27,7 +27,7 @@
   data = {}
   vform = null
   errmsg = ''
-  onsave = async () => { }
+  oncreate = async () => { }
   onOk = async () => {
     let valid = $data.vform.checkValidity()
     if (!valid) {
@@ -35,7 +35,7 @@
       return
     }
     try {
-      await $data.onsave($data.data)
+      await $data.oncreate($data.data)
     } catch (error) {
       errmsg = error.message || error || '未知错误'
       console.error(error)
