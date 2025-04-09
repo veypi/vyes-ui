@@ -2,27 +2,57 @@
 <html>
 
 <style>
+  body {}
+
+  .form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 0.5rem;
+  }
+
+  .form-row {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    font-weight: 500;
+    color: #334155;
+    display: flex;
+    align-items: center;
+  }
+
+  .error-message {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+  }
 </style>
 
 <body>
-  <form vdom='vform' class="flex flex-col gap-4">
-    <div class="my-2" v-if='!key.disabled' :style="'height:'+key.height" v-for='key in keys'>
-      <div class="flex gap-2 h-full">
-        <div class="truncate" :style="'width:'+label_width">{{key.label || key.name}}</div>
-        <div class="flex-grow">
-          <div refu='input' :required='key.required' v:value='data[key.name]' :type='key.type' :validate='key.validate'
-            :opts='key.opts'></div>
+  <div class="form-container">
+    <form vdom='vform' class="flex flex-col gap-4">
+      <div class="form-row" v-if='!key.disabled' :style="'height:'+key.height" v-for='key in keys'>
+        <div class="flex gap-4 h-full items-center">
+          <div class="form-label" :style="'width:'+label_width">{{key.label || key.name}}</div>
+          <div class="flex-grow">
+            <div refu='input' class="w-full" :required='key.required' v:value='data[key.name]' :type='key.type'
+              :validate='key.validate' :opts='key.opts'></div>
+          </div>
         </div>
       </div>
-    </div>
-    <div style="color: red;">{{errmsg}}</div>
-    <div class="flex justify-center mt-10">
-      <div size='lg' refu='btn' :click='onOk' style="width: 8rem;">创建</div>
-    </div>
-  </form>
+      <div class="error-message">{{errmsg}}</div>
+      <div class="flex justify-center mt-6">
+        <div refu='btn' size='lg' :click='onOk'>创建</div>
+      </div>
+    </form>
+  </div>
 </body>
+
 <script setup>
-  label_width = '6rem'
+  label_width = '8rem'
   keys = []
   data = {}
   vform = null

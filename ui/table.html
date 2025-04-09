@@ -1,19 +1,8 @@
 <!DOCTYPE html>
 <html>
 <style>
-  .loading-spinner {
-    border: 4px solid rgba(0, 0, 0, 0.1);
-    border-left-color: #000;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-  }
+  body {}
 
-  body {
-  }
-  .table {
-    min-height: 20rem;
-  }
 
   .table-column {
     flex-grow: 1;
@@ -51,7 +40,7 @@
   }
 
   .table-value[odd='1'] {
-    /* background-color: color-mix(in srgb, var(--background-color, #fff), #888 20%); */
+    background-color: color-mix(in srgb, var(--background-color, #fff), #888 10%);
   }
 
   .table-btn {}
@@ -85,13 +74,22 @@
   }
 
   .keysearch {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
     outline: none;
-    border: 1px solid var(--color, #000);
+    transition: border-color 0.2s ease-in-out;
+  }
+
+  .keysearch:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
   }
 </style>
 
 <body>
-  <div class="flex table justify-evenly overflow-x-auto">
+  <div class="flex justify-evenly overflow-x-auto">
     <div v-if='!key.hidden' class="table-column" :class="{'sticky-column':index===0}" style="min-height: 21rem;left:0"
       v-for='(key,index) in keys'>
       <div class="header-key">{{key.label||key.name}}</div>
@@ -128,7 +126,7 @@
       </div>
     </div>
   </div>
-  <div class="flex items-center gap-2 px-4 select-none">
+  <div class="flex items-center gap-2 px-4 select-none h-12">
     <input !value='listOpts.keyword' @input.delay1s='search' class="keysearch" placeholder="简单检索" />
     <div refu='icon' name='left' class="ml-auto" @click='wrap(0,-1)'></div>
     <div>{{listOpts.page}}</div>
