@@ -38,6 +38,18 @@
   }
 
   input[type="text"]:focus {}
+
+  .bool-toggle {
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background: #f0f0f0;
+    transition: all 0.2s;
+  }
+
+  .bool-toggle:hover {
+    background: #e0e0e0;
+  }
 </style>
 
 <body class='relative'>
@@ -47,7 +59,7 @@
       !value :placeholder !required>
     </textarea>
     <div v-else-if='type==="bool"'>
-      <div @click='value=!value'>{{value?'true':'false'}}</div>
+      <div class="bool-toggle" @click='value=!value'>{{value?'✓':'✗'}}</div>
     </div>
     <input vdom='vref' v-else-if='type==="number"' class="clear vinput-core grow" type="number" @input='sync_evt'
       !value='value||0' :placeholder !required />
