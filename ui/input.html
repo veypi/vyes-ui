@@ -5,9 +5,10 @@
   .clear {
     background: none;
     outline: none;
+    padding: 0;
   }
 
-  .clear:invalid+hr {
+  .clear:invalid {
     border: #f00 solid 1px !important;
   }
 
@@ -16,24 +17,7 @@
     width: 100%;
   }
 
-  hr {
-    margin: auto;
-    position: absolute;
-    bottom: -1px;
-    border: rgba(128, 128, 128, 0.2) solid 1px;
-    transition: all 0.2s linear;
-  }
-
-  body:hover hr {
-    border: rgba(128, 128, 128, 9) solid 1px;
-    width: 100% !important;
-    left: 0rem !important;
-  }
-
-
   .vinput-core {
-    width: calc(100% - 1rem);
-    padding-left: 1rem;
     min-width: 3rem;
   }
 
@@ -49,6 +33,10 @@
 
   .bool-toggle:hover {
     background: #e0e0e0;
+  }
+
+  .grow {
+    flex-grow: 1;
   }
 </style>
 
@@ -67,8 +55,6 @@
       :placeholder></input-select>
     <input vdom='vref' v-else class="clear vinput-core grow" type="text" @input='sync_evt' !value="value||''"
       :placeholder !required />
-    <hr v-if='type!="select"'
-      :style="label?`width:calc(100% - 2rem - ${label_width});left: calc(1rem + ${label_width})`:'width:calc(100% - 2rem);left:1rem'">
   </div>
 </body>
 <script setup>

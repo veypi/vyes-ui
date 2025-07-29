@@ -22,17 +22,7 @@
     transition: 'all 0.3s ease',
   })
   dom.classList.add('animate__animated')
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      $data.show = false
-    }
-  })
-  document.addEventListener('click', (event) => {
-    if (dom.contains(event.target)) {
-      return
-    }
-    $data.show = false
-  })
+  let moveClick = null
   let nodes = Array.from($node.childNodes)
   setTimeout(() => {
     dom.innerHTML = ''
@@ -43,7 +33,14 @@
       if ($data.show) {
         dom.classList.add('animate__fadeIn')
         document.body.appendChild(dom)
+        document.addEventListener('click', (event) => {
+          if (dom.contains(event.target)) {
+            return
+          }
+          $data.show = false
+        }, true)
       } else {
+        moveClick && document.removeEventListener('click', moveClick)
         dom.classList.add('animate__fadeOut')
         setTimeout(() => {
           // dom.style.display = 'none'

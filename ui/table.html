@@ -8,7 +8,7 @@
     flex-grow: 1;
     max-width: 30%;
     border-bottom: 2px solid black;
-    background-color: var(--background-color, #fff);
+    background-color: var(--color-background, #fff);
   }
 
   .sticky-column {
@@ -40,7 +40,7 @@
   }
 
   .table-value[odd='1'] {
-    background-color: color-mix(in srgb, var(--background-color, #fff), #888 10%);
+    background-color: color-mix(in srgb, var(--color-background, #fff), #888 10%);
   }
 
   .table-btn {}
@@ -50,7 +50,7 @@
     max-height: 80vh;
     overflow: auto;
     width: 50vw;
-    background-color: var(--background-color, #fff);
+    background-color: var(--color-background, #fff);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     padding: 2rem;
     border-radius: 0.5rem;
@@ -83,7 +83,7 @@
   }
 
   .keysearch:focus {
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
   }
 </style>
@@ -95,7 +95,7 @@
       <div class="header-key">{{key.label||key.name}}</div>
       <div class="table-value" :odd='index%2' v-for='(row, index) in data'>
         <vslot :name='key.name' v='row,index' :style="key.style">
-          <div refu='input' v:value='row[key.name]' :type="key.type==='textarea'?'text':key.type"
+          <div vsrc='input' v:value='row[key.name]' :type="key.type==='textarea'?'text':key.type"
             :required='key.required' :validate='key.validate' :opts='key.opts'
             v-if='editable && !key.disabled && row._enable'>
           </div>
@@ -107,33 +107,33 @@
     </div>
     <div class="table-column sticky-column" style="right:0;min-width: 8rem;">
       <vslot name='_key' class="header-key">
-        <div refu='dropdown' class="w-full">
-          <div refu='icon' class="text-2xl" name='ecs'></div>
+        <div vsrc='dropdown' class="w-full mt-2">
+          <i class="fa-solid fa-ellipsis"></i>
           <div vslot='menu'>
             <div class="dropdown-item" @click='show(0)'>创建</div>
             <div class="dropdown-item" @click='show(1)'>高级检索</div>
-            <div class="dropdown-item" @click='show(2)'>智能导入</div>
           </div>
         </div>
       </vslot>
       <div class="table-value" :odd='index%2' v-for='(row, index) in data'>
-        <vslot class="w-full flex justify-center gap-2 text-xl" name='_addon' v='row,index'>
-          <div refu='icon' name='edit-square' color='#78c' v-if='!row._enable' @click='row._enable=true'></div>
-          <div refu='icon' name='save' color='#ff3300' v-else @click='wrap(1, row)'></div>
-          <div refu='icon' name='delete' color='#f66' v-if='!row._enable' @click='wrap(3, row)'></div>
-          <div refu='icon' name='close' color='#aaa' v-else @click='delete row._enable'></div>
+        <vslot class="w-full h-full flex justify-center items-center gap-2 text-xl" name='_addon' v='row,index'>
+          <i class="fa-solid fa-pen-to-square fa-sm" color='#78c' v-if='!row._enable && editable'
+            @click='enable_edit(row)'></i>
+          <i class="fa-solid fa-floppy-disk fa-sm" style="color: #ff3300;" v-else-if='editable'
+            @click='wrap(1,row)'></i>
+          <i class="fa-solid fa-trash fa-sm" style="color:#a66" v-if='editable' @click='wrap(3, row)'></i>
         </vslot>
       </div>
     </div>
   </div>
   <div class="flex items-center gap-2 px-4 select-none h-12">
-    <input !value='listOpts.keyword' @input.delay1s='search' class="keysearch" placeholder="简单检索" />
-    <div refu='icon' name='left' class="ml-auto" @click='wrap(0,-1)'></div>
+    <input :value='listOpts.keyword' @input.delay1s='search' class="keysearch" placeholder="简单检索" />
+    <i class="fa-solid fa-angle-left ml-auto" @click='wrap(0,-1)'></i>
     <div>{{listOpts.page}}</div>
-    <div refu='icon' name='right' class="mr-auto" @click='wrap(0,1)'></div>
+    <i class="fa-solid fa-angle-right mr-auto" @click='wrap(0,1)'></i>
     <div class="">总计{{total}}条数据</div>
   </div>
-  <div refu='dialog' v:show='showFlag'>
+  <div vsrc='dialog' v:show='showFlag'>
     <div class="dialog">
       <vslot v-if='showMode==0' name='create' v='keys,oncreate'>
         <table-create :keys='keys' :oncreate='oncreate'></table-create>
@@ -143,7 +143,7 @@
       <div v-else-if class="w-full flex flex-col flex-grow items-center gap-4" style=" height: calc(100% - 0px);">
         <textarea class="w-full bg-gray-200 flex-grow p-4" placeholder="请输入文本内容或者拖入文件" !value='ai_content'
           @input='ai_content=$event.target.value' style="resize:vertical;"></textarea>
-        <div refu='btn' class="mx-auto" size='lg' :click='ai'>智能识别</div>
+        <div vsrc='btn' class="mx-auto" size='lg' :click='ai'>智能识别</div>
       </div>
     </div>
   </div>
@@ -154,69 +154,19 @@
   loading = false
   keys = []
   data = []
-  host = window.location.origin
   api = ''
-  editable = false
+  editable = true
   ai_content = ''
-  ai = async () => {
-    let keyData = []
-    keys.forEach((k) => {
-      if (k.disabled) {
-        return
-      }
-      keyData.push({key: k.name, label: k.label, type: k.type || 'text'})
-    })
-    let body = JSON.stringify({
-      system: "",
-      model: 'qwen-max-latest',
-      messages: [{
-        role: 'user', content: `
-接下来我将给你一个结构体描述信息和一段文本，结构体参数默认为字符串类型,如果参数 请直接以json方式返回提取的结构信息,如果提取失败就返回空列表对象[],如果用户提出生成随机数据或者生成数据等请求，请你根据字段描述生成mock数据
-结构体：
-  ${JSON.stringify(keyData)}
-描述信息：
-  ${ai_content}
-`}]
-    })
-    ai_content = ''
-    let json_res = ''
-    let checked = false
-    await $env.api.SSE(`${window.location.origin}/_/api/ai/gen`, {method: "POST", body: body}, (line, idx) => {
-      if (idx === -1) {
-        try {
-          console.log(json_res)
-          let data = JSON.parse(ai_content.slice(7, -3))
-          console.log(data)
-          let fc = async () => {
-            let c = 0
-            for (d of data) {
-              try {
-                create(d)
-                c++
-              } catch (e) {
-                console.log(e)
-              }
-            }
-            alert(`成功导入${c}条数据`)
-            wrap(0)
-          }
-          fc()
-        } catch (e) {
-          console.log(e)
-        }
-        console.log('done')
-      }
-      if (line.indexOf('```json') != -1) {
-        json_res = line.slice(line.indexOf('```json'))
-        checked = true
-      } else if (checked && line.indexOf('```') != -1) {
-        json_res += line.slice(0, line.indexOf('```'))
-        checked = false
-      } else if (checked) {
-        json_res += line
-      }
-      ai_content += line
-    })
+  axios = $axios
+  querys = {}
+  origin_content = {}
+
+  enable_edit = (row) => {
+    if (editable) {
+      delete row._enable
+      origin_content[row.id] = Object.assign({}, row)
+      row._enable = true
+    }
   }
   show = (m) => {
     showMode = m
@@ -227,43 +177,42 @@
   }
   update = async (row) => {
     if (api) {
-      return await $env.api.Patch(host + api + '/' + row.id, row)
+      return await axios.patch(api + '/' + row.id, row, {params: querys})
     }
   }
   total = 0
   listOpts = {
     page: 1,
     page_size: 10,
-    keyword: '',
-    keywords: {},
     sort_by: 'created_at',
     order: 'desc',
   }
   next = async (opts) => {
     if (api) {
-      opts = Object.assign({}, opts)
-      if (opts.keywords && Object.keys(opts.keywords).length > 0) {
-        opts.keywords = JSON.stringify(opts.keywords)
-      } else {
-        delete opts.keywords
-      }
-      return await $env.api.Get(host + api, opts)
+      opts = Object.assign({}, opts, querys)
+      return await axios.get(api, {params: opts})
     }
     return []
   }
   create = async (data) => {
     if (api) {
-      return await $env.api.Post(host + api, data)
+      return await axios.post(api, data, {params: querys})
     }
     return
   }
   del = async (row) => {
     if (api) {
-      return await $env.api.Delete(host + api + '/' + row.id, row)
+      return await axios.delete(api + '/' + row.id, {params: querys})
     }
   }
   search = (e) => {
-    listOpts.keyword = e.target.value
+    // listOpts.keyword = e.target.value
+    keys.find((key) => {
+      if (key.name.indexOf('name') >= 0) {
+        listOpts[key.name] = e.target.value
+        return true
+      }
+    })
     wrap(0)
   }
   oncreate = async (d) => {
@@ -291,30 +240,41 @@
           $data.total = data.total
         }
       } else if (mode === 1) {
-        await update(props)
-        props._enable = false
+        let origin = origin_content[props.id]
+        let newData = {}
+        delete props._enable
+        for (let key in props) {
+          if (props[key] !== origin[key]) {
+            newData[key] = props[key]
+          }
+        }
+        if (Object.keys(newData).length > 0) {
+          newData.id = origin.id
+          await update(newData)
+        }
       } else if (mode === 2) {
         let res = await create(props)
         showFlag = false
         $data.data.push(res)
       } else if (mode == 3) {
         await del(props)
-        $data.data = $data.data.filter((d) => d.id !== data.id)
+        data = data.filter((d) => d.id !== props.id)
       }
       showFlag = false
     } catch (e) {
       $data.onerr(e)
     }
-    console.log('done')
   }
   onerr = (e) => {
     console.error(e)
   }
 </script>
 <script>
-  if ($data.data.length === 0 && $data.api) {
-    wrap(0)
-  }
+  $watch(() => {
+    if (api) {
+      wrap(0)
+    }
+  })
 </script>
 
 </html>

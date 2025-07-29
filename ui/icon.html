@@ -2,22 +2,16 @@
   body {
     --icon-size: var(--icon-size, 2rem);
     --icon-color: var(--icon-color, #000);
+    --fill-color: var(--icon-color);
+    --mix-color: color-mix(in srgb, var(--icon-color), #999 50%);
     height: var(--icon-size);
     width: var(--icon-size);
-    font-size: calc(var(--icon-size) - 0.5rem);
-    line-height: var(--icon-size);
     display: inline-flex;
     justify-content: center;
     align-items: center;
     transition: all 0.3s;
     cursor: pointer;
     color: var(--icon-color);
-  }
-
-  body i {
-    font-family: "iconfont" !important;
-    font-style: normal;
-    -webkit-font-smoothing: antialiased;
   }
 
   body:hover {
@@ -29,27 +23,43 @@
   }
 
   body[type=round]:hover {
-    background-color: color-mix(in srgb, var(--icon-color), #999 40%);
-    color: #fff;
+    background-color: var(--mix-color);
+    --fill-color: #fff;
   }
 
   body[type=rect]:hover {
-    background-color: color-mix(in srgb, var(--icon-color), #999 40%);
-    color: #fff;
+    background-color: var(--mix-color);
+    --fill-color: #fff;
   }
 
   body[type=outline] {
-    border: 1px solid var(--icon-color);
-    background-color: transparent;
+    border: 1px solid;
+    border-color: color-mix(in srgb, #aaa 50%, var(--icon-color) 50%);
+    border-radius: 50%;
+  }
+
+  body[type=outline]:hover {
+    background-color: var(--mix-color);
+    border: none;
+    --fill-color: #fff;
+  }
+
+  .icon {
+    width: calc(var(--icon-size) - 20%);
+    height: calc(var(--icon-size) - 20%);
+    fill: var(--fill-color);
+    overflow: hidden;
   }
 </style>
 
 <body :style="`--icon-size:${size};--icon-color:${color}`" :type>
-  <i :class="'icon-'+name"></i>
+  <svg class="icon" aria-hidden="true">
+    <use :href="'#icon-'+name"></use>
+  </svg>
 </body>
 <script setup>
   size = '2rem'
-  color = '#000'
+  color = '#232323'
   name = ''
   type = 'round' // rect, round, outline, none
 </script>

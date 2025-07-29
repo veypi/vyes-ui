@@ -8,11 +8,11 @@ package vyesui
 
 import (
 	"embed"
-	"github.com/veypi/OneBD/rest"
-	"github.com/veypi/OneBD/rest/middlewares/vyes"
+	"github.com/vyes/vigo"
+	"github.com/vyes/vigo/contrib/vyes"
 )
 
-var Router = rest.NewRouter()
+var Router = vigo.NewRouter()
 
 //go:embed ui/*
 var uifs embed.FS

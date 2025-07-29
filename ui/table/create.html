@@ -4,14 +4,6 @@
 <style>
   body {}
 
-  .form-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 2rem;
-    background: white;
-    border-radius: 0.5rem;
-  }
-
   .form-row {
     margin-bottom: 1.5rem;
   }
@@ -32,23 +24,21 @@
 </style>
 
 <body>
-  <div class="form-container">
-    <form vdom='vform' class="flex flex-col gap-4">
-      <div class="form-row" v-if='!key.disabled' :style="'height:'+key.height" v-for='key in keys'>
-        <div class="flex gap-4 h-full items-center">
-          <div class="form-label" :style="'width:'+label_width">{{key.label || key.name}}</div>
-          <div class="flex-grow">
-            <div refu='input' class="w-full" :required='key.required' v:value='data[key.name]' :type='key.type'
-              :validate='key.validate' :opts='key.opts'></div>
-          </div>
+  <form vdom='vform' class="flex flex-col gap-4">
+    <div class="form-row" v-if='!key.disabled' :style="'height:'+key.height" v-for='key in keys'>
+      <div class="flex gap-4 h-full items-center">
+        <div class="form-label" :style="'width:'+label_width">{{key.label || key.name}}</div>
+        <div class="flex-grow">
+          <div vsrc='input' class="w-full" :required='key.required' v:value='data[key.name]' :type='key.type'
+            :validate='key.validate' :opts='key.opts'></div>
         </div>
       </div>
-      <div class="error-message">{{errmsg}}</div>
-      <div class="flex justify-center mt-6">
-        <div refu='btn' size='lg' :click='onOk'>创建</div>
-      </div>
-    </form>
-  </div>
+    </div>
+    <div class="error-message">{{errmsg}}</div>
+    <div class="flex justify-center mt-6">
+      <div vsrc='btn' size='lg' :click='onOk'>创建</div>
+    </div>
+  </form>
 </body>
 
 <script setup>
@@ -57,15 +47,17 @@
   data = {}
   vform = null
   errmsg = ''
-  oncreate = async () => { }
+  oncreate = async () => {
+  }
   onOk = async () => {
-    let valid = $data.vform.checkValidity()
+    let valid = vform.checkValidity()
     if (!valid) {
-      $data.vform.reportValidity()
+      vform.reportValidity()
       return
     }
     try {
-      await $data.oncreate($data.data)
+      console.log('提交数据:', data)
+      await oncreate(data)
     } catch (error) {
       errmsg = error.message || error || '未知错误'
       console.error(error)
